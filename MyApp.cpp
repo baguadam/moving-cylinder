@@ -2,6 +2,7 @@
 #include "SDL_GLDebugMessageCallback.h"
 
 #include <imgui.h>
+#include <iostream>
 
 CMyApp::CMyApp()
 {
@@ -37,15 +38,16 @@ void CMyApp::CleanShaders()
 }
 
 void CMyApp::AddCircleCoordinates(MeshObject<VertexPosColor>& meshCPU, int coordinateZ) {
-	meshCPU.vertexArray.push_back({ glm::vec3(0, 0, coordinateZ), glm::vec3(1, 0, 0) });
+	meshCPU.vertexArray.push_back({ glm::vec3(0, 0, coordinateZ / 2), glm::vec3(1, 0, coordinateZ) });
 
 	// Kör koordinátáinak kiszámítása egységkör alapján
 	for (int i = 0; i < triangleCount; ++i) {
+		double colorValue = static_cast<double>(i) / triangleCount;
 		meshCPU.vertexArray.push_back(
 			{ glm::vec3(cos((360 / triangleCount) * (i + 1) * M_PI / 180) / 2,
 					    sin((360 / triangleCount) * (i + 1) * M_PI / 180) / 2,
 					    coordinateZ),
-			 glm::vec3(1, 0, 0) } // szükséges koordináták meghatározása az "egységkörben"
+			 glm::vec3(colorValue, coordinateZ / 2, colorValue) } // szükséges koordináták meghatározása az "egységkörben"
 		);
 	}
 }
@@ -110,6 +112,8 @@ void CMyApp::InitGeometry()
 	AddCircleIndexes(meshCPU, triangleCount + 2, 2 * triangleCount + 1, false); // hasonlóan első index, ami nem az origó, ez a háromszögek száma + 2 a két origo miatt
 
 	AddWallIndexes(meshCPU);
+
+	PrintColors(meshCPU);
 
 	// 1 db VAO foglalasa
 	glGenVertexArrays(1, &vaoID);
