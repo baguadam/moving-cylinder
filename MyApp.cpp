@@ -43,11 +43,34 @@ void CMyApp::AddCircleCoordinates(MeshObject<VertexPosColor>& meshCPU, int coord
 	for (int i = 0; i < triangleCount; ++i) {
 		meshCPU.vertexArray.push_back(
 			{ glm::vec3(cos((360 / triangleCount) * (i + 1) * M_PI / 180) / 2,
-					  sin((360 / triangleCount) * (i + 1) * M_PI / 180) / 2,
-					  coordinateZ),
+					    sin((360 / triangleCount) * (i + 1) * M_PI / 180) / 2,
+					    coordinateZ),
 			 glm::vec3(1, 0, 0) } // szükséges koordináták meghatározása az "egységkörben"
 		);
 	}
+}
+
+void CMyApp::AddWallIndexes(MeshObject<VertexPosColor>& meshCPU) {
+	// hör háromszögeinek összekötése minden minden körháromszög, kivéve az utolsó esetén
+	for (int i = 1; i < triangleCount; ++i) {
+		meshCPU.indexArray.push_back(i); // alsó körön a "bal alsó" koordinána
+		meshCPU.indexArray.push_back(triangleCount + i + 2); // felső körön a "jobb felső" koordináta
+		meshCPU.indexArray.push_back(triangleCount + i + 1); // felső körön a "bal felső" koordináta
+
+		meshCPU.indexArray.push_back(i); // alsó kör "bal alsó"
+		meshCPU.indexArray.push_back(i + 1); // alsó kör "jobb alsó"
+		meshCPU.indexArray.push_back(triangleCount + i + 2); // felső kör "jobb felső"
+	}
+
+	// utolsó háromszögek között az egyik háromszög kirajzolása: alsó utolsó koordinátája + felső első koordinátája + felső utolsó koordinátája
+	meshCPU.indexArray.push_back(triangleCount); // alsó "bal alsó"
+	meshCPU.indexArray.push_back(triangleCount + 2); // felső "jobb felső"
+	meshCPU.indexArray.push_back(2 * triangleCount + 1); // felső "bal felső"
+
+	// szintén utolsó háromszögek között a másik háromszög: alső utolsó + alsó első + felső első
+	meshCPU.indexArray.push_back(triangleCount); // alsó "bal alsó"
+	meshCPU.indexArray.push_back(1); // alsó "jobb alsó"
+	meshCPU.indexArray.push_back(triangleCount + 2); // felső "bal felső"
 }
 
 void CMyApp::AddCircleIndexes(MeshObject<VertexPosColor>& meshCPU, int from, int to, bool isBaseCircle) {
@@ -85,6 +108,8 @@ void CMyApp::InitGeometry()
 
 	AddCircleIndexes(meshCPU, 1, triangleCount, true); // első index, ami nem az origo, utolsó index, alapkör-e 
 	AddCircleIndexes(meshCPU, triangleCount + 2, 2 * triangleCount + 1, false); // hasonlóan első index, ami nem az origó, ez a háromszögek száma + 2 a két origo miatt
+
+	AddWallIndexes(meshCPU);
 
 	// 1 db VAO foglalasa
 	glGenVertexArrays(1, &vaoID);
@@ -155,7 +180,7 @@ bool CMyApp::Init()
 	// egyéb inicializálás
 	//
 
-	// glEnable(GL_CULL_FACE); // kapcsoljuk be a hátrafelé néző lapok eldobását
+	glEnable(GL_CULL_FACE); // kapcsoljuk be a hátrafelé néző lapok eldobását
 	glCullFace(GL_BACK);    // GL_BACK: a kamerától "elfelé" néző lapok, GL_FRONT: a kamera felé néző lapok
 
 	glEnable(GL_DEPTH_TEST); // mélységi teszt bekapcsolása (takarás)
