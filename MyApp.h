@@ -83,6 +83,6 @@ protected:
 
 private:
 	void AddCircleCoordinates(MeshObject<VertexPosColor>&, int);
-	void AddCircleIndexes(MeshObject<VertexPosColor>&, int, int);
+	void AddCircleIndexes(MeshObject<VertexPosColor>&, int, int, bool);
 };
 

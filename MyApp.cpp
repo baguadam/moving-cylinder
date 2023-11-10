@@ -50,17 +50,30 @@ void CMyApp::AddCircleCoordinates(MeshObject<VertexPosColor>& meshCPU, int coord
 	}
 }
 
-void CMyApp::AddCircleIndexes(MeshObject<VertexPosColor>& meshCPU, int from, int to) {
+void CMyApp::AddCircleIndexes(MeshObject<VertexPosColor>& meshCPU, int from, int to, bool isBaseCircle) {
 	// Hozzáadjuk a szükséges indexeket a tömbhöz
 	for (int i = from; i < to; ++i) {
-		meshCPU.indexArray.push_back(0);
-		meshCPU.indexArray.push_back(i);
-		meshCPU.indexArray.push_back(i + 1);
+		meshCPU.indexArray.push_back(from - 1);
+		if (isBaseCircle) {
+			meshCPU.indexArray.push_back(i + 1);
+			meshCPU.indexArray.push_back(i);
+		}
+		else {
+			meshCPU.indexArray.push_back(i);
+			meshCPU.indexArray.push_back(i + 1);
+		}
 	}
 
+	// utolsó háromszög kirajzolása, ez köti össze az origot, az utolsó pontot és a legelső pontot egymással
 	meshCPU.indexArray.push_back(from - 1);
-	meshCPU.indexArray.push_back(to - 1);
-	meshCPU.indexArray.push_back(from);
+	if (isBaseCircle) {
+		meshCPU.indexArray.push_back(from);
+		meshCPU.indexArray.push_back(to);
+	}
+	else {
+		meshCPU.indexArray.push_back(to);
+		meshCPU.indexArray.push_back(from);
+	}
 }
 
 void CMyApp::InitGeometry()
@@ -70,8 +83,8 @@ void CMyApp::InitGeometry()
 	AddCircleCoordinates(meshCPU, 0); // alapkör koordinátái
 	AddCircleCoordinates(meshCPU, 2); // borítókör koordinátái
 
-	AddCircleIndexes(meshCPU, 1, triangleCount);
-	AddCircleIndexes(meshCPU, triangleCount, meshCPU.vertexArray.size() - 1);
+	AddCircleIndexes(meshCPU, 1, triangleCount, true); // első index, ami nem az origo, utolsó index, alapkör-e 
+	AddCircleIndexes(meshCPU, triangleCount + 2, 2 * triangleCount + 1, false); // hasonlóan első index, ami nem az origó, ez a háromszögek száma + 2 a két origo miatt
 
 	// 1 db VAO foglalasa
 	glGenVertexArrays(1, &vaoID);
@@ -142,7 +155,7 @@ bool CMyApp::Init()
 	// egyéb inicializálás
 	//
 
-	glEnable(GL_CULL_FACE); // kapcsoljuk be a hátrafelé néző lapok eldobását
+	// glEnable(GL_CULL_FACE); // kapcsoljuk be a hátrafelé néző lapok eldobását
 	glCullFace(GL_BACK);    // GL_BACK: a kamerától "elfelé" néző lapok, GL_FRONT: a kamera felé néző lapok
 
 	glEnable(GL_DEPTH_TEST); // mélységi teszt bekapcsolása (takarás)
