@@ -297,7 +297,7 @@ void CMyApp::KeyboardDown(const SDL_KeyboardEvent& key)
 			glPolygonMode(GL_FRONT_AND_BACK, polygonMode); // Állítsuk be az újat!
 		}
 		if (key.keysym.sym == SDLK_SPACE) {
-			isSpacePushed = true;
+			isSpacePushed = !isSpacePushed;
 		}
 	}
 	m_camera.KeyboardDown(key);
