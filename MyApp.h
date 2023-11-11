@@ -77,6 +77,9 @@ protected:
 	GLsizei count = 0; // mennyi indexet/vertexet kell rajzolnunk
 	GLsizei triangleCount = 90;
 
+	GLfloat zAxisSize = 1.0f;
+	bool isSpacePushed = false;
+
 	// Geometria inicializálása, és törtlése
 	void InitGeometry();
 	void CleanGeometry();
