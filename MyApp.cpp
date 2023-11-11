@@ -209,8 +209,6 @@ void CMyApp::Update(const SUpdateInfo& updateInfo)
 	m_camera.Update(updateInfo.DeltaTimeInSec);
 }
 
-
-
 void CMyApp::Render()
 {
 	// töröljük a frampuffert (GL_COLOR_BUFFER_BIT)...
@@ -236,9 +234,13 @@ void CMyApp::Render()
 		glm::vec3(-2.5f,  2.5f,  2.5f),
 	};
 
+	float x = std::sinf(2.0f * glm::pi<float>() * 1.0f/6.0f * m_ElapsedTimeInSec) * 10;
+	float z = 0.01f * std::pow(x, 3) + 0.05f * std::pow(x, 2);
+	glm::vec3 moveVector(x, 0, z);
+
 	// nyolc alakzat transzformálása és kirajzolása a megfelelő helyre
 	for (auto vertex : cubeVertices) {
-		glm::mat4 matWorld = glm::translate(vertex);
+		glm::mat4 matWorld = glm::translate(vertex + moveVector);
 		glUniformMatrix4fv(ul("world"), 1, GL_FALSE, glm::value_ptr(matWorld));
 		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 	}
