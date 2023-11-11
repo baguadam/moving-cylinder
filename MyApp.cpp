@@ -113,8 +113,6 @@ void CMyApp::InitGeometry()
 
 	AddWallIndexes(meshCPU);
 
-	PrintColors(meshCPU);
-
 	// 1 db VAO foglalasa
 	glGenVertexArrays(1, &vaoID);
 	// a frissen generált VAO beallitasa aktívnak
