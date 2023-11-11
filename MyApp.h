@@ -75,7 +75,7 @@ protected:
 	GLuint  vboID = 0; // vertex buffer object erőforrás azonosító
 	GLuint  iboID = 0; // index buffer object erőforrás azonosító
 	GLsizei count = 0; // mennyi indexet/vertexet kell rajzolnunk
-	GLsizei triangleCount = 36;
+	GLsizei triangleCount = 90;
 
 	// Geometria inicializálása, és törtlése
 	void InitGeometry();
@@ -83,6 +83,7 @@ protected:
 
 private:
 	void AddCircleCoordinates(MeshObject<VertexPosColor>&, int);
-	void AddCircleIndexes(MeshObject<VertexPosColor>&, int, int);
+	void AddCircleIndexes(MeshObject<VertexPosColor>&, int, int, bool);
+	void AddWallIndexes(MeshObject<VertexPosColor>&);
 };
 
