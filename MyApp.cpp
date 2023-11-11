@@ -209,6 +209,8 @@ void CMyApp::Update(const SUpdateInfo& updateInfo)
 	m_camera.Update(updateInfo.DeltaTimeInSec);
 }
 
+
+
 void CMyApp::Render()
 {
 	// töröljük a frampuffert (GL_COLOR_BUFFER_BIT)...
@@ -222,86 +224,26 @@ void CMyApp::Render()
 	glUseProgram(m_programID);
 	glUniformMatrix4fv(ul("viewProj"), 1, GL_FALSE, glm::value_ptr(m_camera.GetViewProj())); //ha egyszer leküldöm, ő már nem változik
 
-	// - paraméterek számolása
+	// az origó középpontű, 5 egység élhosszúságú kocka csúcsai
+	glm::vec3 cubeVertices[] = {
+		glm::vec3( 2.5f, -2.5f, -2.5f),
+		glm::vec3(-2.5f, -2.5f, -2.5f),
+		glm::vec3(-2.5f,  2.5f, -2.5f),
+		glm::vec3( 2.5f,  2.5f, -2.5f),
+		glm::vec3( 2.5f, -2.5f,  2.5f),
+		glm::vec3(-2.5f, -2.5f,  2.5f),
+		glm::vec3( 2.5f,  2.5f,  2.5f),
+		glm::vec3(-2.5f,  2.5f,  2.5f),
+	};
 
-	// Transzformációs mátrixok
-	/*
+	// nyolc alakzat transzformálása és kirajzolása a megfelelő helyre
+	for (auto vertex : cubeVertices) {
+		glm::mat4 matWorld = glm::translate(vertex);
+		glUniformMatrix4fv(ul("world"), 1, GL_FALSE, glm::value_ptr(matWorld));
+		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+	}
 
-	GLM transzformációs mátrixokra példák:
-		glm::rotate<float>( szög, glm::vec3(tengely_x, tengely_y, tengely_z) ) <- tengely_{xyz} körüli elforgatás
-		glm::translate<float>( glm::vec3(eltol_x, eltol_y, eltol_z) ) <- eltolás
-		glm::scale<float>( glm::vec3(s_x, s_y, s_z) ) <- skálázás
-
-	*/
-
-	//glm::mat4 matWorld = glm::identity<glm::mat4>();
-	//glm::mat4 matWorld = glm::translate(glm::vec3(2, 0, 0)); //x, y, z tengelyen hova tolja el
-	//glm::mat4 matWorld = glm::scale(glm::vec3(2, 0.5, 1)); //x, y, z tengelyen hogyan "nyújtsa-nyomja"
-	//tükrözés negatív számokkal, ilyenkor két tengelyen kell tükrözni, mert egy tengellyel 
-	//megváltozna a körüljárási irány és fura dolgot kapnék, kifordulnának az oldalak
-	//glm::mat4 matWorld = glm::rotate(glm::radians(45.f), glm::vec3(0,1,0)); //elforgatás szöge radiánban + melyik tengely
-	//ha több tengely körül akarok forgatni, akkor össze kell kombinálnom, egyet az x-tengely körül,
-	//majd egy másik trafó az y tengely körül
-	//glm::mat4 matWorld = glm::translate(glm::vec3(2, 0, 0)) * glm::translate(glm::vec3(1, 2, 0));
-	/*glm::mat4 matWorld = glm::translate(glm::vec3(5, 0, 0)) *
-		glm::rotate(glm::radians(45.f), glm::vec3(0, 1, 0)); */
-		//a scale és a rotate a világ köéppontja körül skáláz, tehát ha előbb eltolom, utána forgatom, akkor
-		//a nem origóban lévő alakzatot továbbra is az origó körül fogja elforgatni -> előbb forgatás, aztán tolás
-
-	glm::mat4 matWorld = glm::identity<glm::mat4>();
-
-	glUniformMatrix4fv(ul("world"),// erre a helyre töltsünk át adatot, mi a shaderben a uniform változó
-		1,			// egy darab mátrixot
-		GL_FALSE,	// NEM transzponálva
-		glm::value_ptr(matWorld)); // innen olvasva a 16 x sizeof(float)-nyi adatot, ez egy pointer
-
-	glDrawElements(GL_TRIANGLES,    // primitív típusa; u.a mint glDrawArrays esetén
-		count,			 // mennyi indexet rajzoljunk
-		GL_UNSIGNED_INT, // indexek típusa
-		nullptr);       // hagyjuk nullptr-en!
-	//	{
-	//		glm::mat4 matWorld = glm::rotate(-m_ElapsedTimeInSec, glm::vec3(0, 1, 0));
-	//		// https://registry.khronos.org/OpenGL-Refpages/gl4/html/glUniform.xhtml
-	//		// itt most leküldök egy 4*4-es mátrixos
-	//		glUniformMatrix4fv(ul("world"),// erre a helyre töltsünk át adatot, mi a shaderben a uniform változó
-	//			1,			// egy darab mátrixot
-	//			GL_FALSE,	// NEM transzponálva
-	//			glm::value_ptr(matWorld)); // innen olvasva a 16 x sizeof(float)-nyi adatot, ez egy pointer
-	//		//ez ugyanaz, mint &matworld[0][0]
-	//
-	//// https://registry.khronos.org/OpenGL-Refpages/gl4/html/glDrawElements.xhtml
-	//		glDrawElements(GL_TRIANGLES,    // primitív típusa; u.a mint glDrawArrays esetén
-	//			count,			 // mennyi indexet rajzoljunk
-	//			GL_UNSIGNED_INT, // indexek típusa
-	//			nullptr);       // hagyjuk nullptr-en!
-	//	}
-	//
-	//	int n = 6;
-	//	for (int i = 0; i < n; i++)
-	//	{
-	//		glm::mat4 matWorld = glm::rotate(m_ElapsedTimeInSec, glm::vec3(0, 1, 0)) * 
-	//			glm::translate(glm::vec3(cos(60 * (i + 1) * M_PI / 180) * m_ElapsedTimeInSec, 0, sin(60 * (i + 1) * M_PI / 180) * m_ElapsedTimeInSec)) *
-	//			glm::rotate(-3*m_ElapsedTimeInSec, glm::vec3(0, 1, 0));
-	//
-	//		glUniformMatrix4fv(ul("world"),// erre a helyre töltsünk át adatot, mi a shaderben a uniform változó
-	//			1,			// egy darab mátrixot
-	//			GL_FALSE,	// NEM transzponálva
-	//			glm::value_ptr(matWorld)); // innen olvasva a 16 x sizeof(float)-nyi adatot, ez egy pointer
-	//
-	//		glDrawElements(GL_TRIANGLES,    // primitív típusa; u.a mint glDrawArrays esetén
-	//			count,			 // mennyi indexet rajzoljunk
-	//			GL_UNSIGNED_INT, // indexek típusa
-	//			nullptr);       // hagyjuk nullptr-en!
-	//	}
-
-
-		/*
-			1. Kitalálom a világtrafót
-			2. Leküldöm a világtrafót
-			3. Rajzolok
-		*/
-
-		// shader kikapcsolasa
+	// shader kikapcsolasa
 	glUseProgram(0);
 
 	// VAO kikapcsolása
