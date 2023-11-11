@@ -238,9 +238,13 @@ void CMyApp::Render()
 	float z = 0.01f * std::pow(x, 3) + 0.05f * std::pow(x, 2);
 	glm::vec3 moveVector(x, 0, z);
 
+	if (isSpacePushed) {
+		zAxisSize = 1.0f + (std::sinf(2.0f * glm::pi<float>() * 1.0f/10.0f * m_ElapsedTimeInSec) * 0.75f + 0.25f);
+	}
+
 	// nyolc alakzat transzformálása és kirajzolása a megfelelő helyre
 	for (auto vertex : cubeVertices) {
-		glm::mat4 matWorld = glm::translate(vertex + moveVector);
+		glm::mat4 matWorld = glm::translate(vertex + moveVector) * glm::scale(glm::vec3(1.0f, 1.0f, zAxisSize));
 		glUniformMatrix4fv(ul("world"), 1, GL_FALSE, glm::value_ptr(matWorld));
 		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 	}
@@ -291,6 +295,9 @@ void CMyApp::KeyboardDown(const SDL_KeyboardEvent& key)
 			GLenum polygonMode = (polygonModeFrontAndBack[0] != GL_FILL ? GL_FILL : GL_LINE); // Váltogassuk FILL és LINE között!
 			// https://registry.khronos.org/OpenGL-Refpages/gl4/html/glPolygonMode.xhtml
 			glPolygonMode(GL_FRONT_AND_BACK, polygonMode); // Állítsuk be az újat!
+		}
+		if (key.keysym.sym == SDLK_SPACE) {
+			isSpacePushed = !isSpacePushed;
 		}
 	}
 	m_camera.KeyboardDown(key);
