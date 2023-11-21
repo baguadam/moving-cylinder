@@ -38,7 +38,7 @@ void CMyApp::CleanShaders()
 }
 
 void CMyApp::AddCircleCoordinates(MeshObject<VertexPosColor>& meshCPU, int coordinateZ) {
-	meshCPU.vertexArray.push_back({ glm::vec3(0, 0, coordinateZ / 2), glm::vec3(1, 0, coordinateZ) });
+	meshCPU.vertexArray.push_back({ glm::vec3(0, 0, coordinateZ), glm::vec3(1, 0, coordinateZ / 2) });
 
 	// Kör koordinátáinak kiszámítása egységkör alapján
 	for (int i = 0; i < triangleCount; ++i) {
